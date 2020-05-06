@@ -1,13 +1,18 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using AutoMapper;
+using ContosoUniversity.Data;
+using ContosoUniversity.Repositories;
+using ContosoUniversity.Repositories.Implements;
+using ContosoUniversity.Services;
+using ContosoUniversity.Services.Implements;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
 
 namespace ContosoUniversity
 {
@@ -24,7 +29,32 @@ namespace ContosoUniversity
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+
+            services.AddDbContext<SchoolContext>(options => options.UseSqlServer(Configuration.GetConnectionString("SchoolContext")));
+
+
+
+            // Repositories            
+            services.AddScoped<IStudentRepository, StudentRepository>();
+            services.AddScoped<ICourseRepository, CourseRepository>();
+            services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
+            services.AddScoped<IInstructorRepository, InstructorRepository>();
+            // Services
+            services.AddTransient<IStudentService, StudentService>();
+            services.AddScoped<ICourseService, CourseService>();
+            services.AddScoped<IEnrollmentService, EnrollmentService>();
+            services.AddScoped<IInstructorService, InstructorService>();
+
+            //AutoMapper
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
+
+
+
+
+
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
